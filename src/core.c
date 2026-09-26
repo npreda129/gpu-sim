@@ -9,32 +9,39 @@ void core_init(core_t *core, int numLanes) {
   }
 }
 
-void core_step(core_t *core) {
-  uint32_t instruction = core->binaryMem[core->pc]
+void core_step(core_t *core) { //this will later be renamed block_step
   lane_t *currentLane;
   uint32_t * regs[3];
   int opcode, imm;
+  uint32_t instruction = core->binaryMem[core->rip];
 
-  for (int i = 0; i < core->numLanes; i++) {
-    // set register pointers for readability
-    currentLane = core->lanes[i];
-    opcode = (instruction >> SHIFT_OP) & MASK_OP;
-    regs[0] = &(currentLane->regs[(instruction >> SHIFT_RS) & MASK_REG]);
-
-    if ((opcode & 0x8)) {
-      // prepare and execute I format
-      imm = (instruction >> SHIFT_IMM) & MASK_IMM;
+  opcode = (instruction >> SHIFT_OP) & MASK_OP;
+  if (opcode == OP_HALT) {
+    return;
+  }
+  if (opcode & 0x8) {
+    // prepare and execute I format
+    imm = (instruction >> SHIFT_IMM) & MASK_IMM;
+    for (int i = 0; i < core->numLanes; i++) {
+      // set register pointers for readability
+      currentLane = core->lanes[i];
+      regs[0] = &(currentLane->regs[(instruction >> SHIFT_RS) & MASK_REG]);
       // core_execute_i(regs, imm);
       *regs[0] = imm;
-
-    } else {
-      // prepare and execute R format
+    }
+  } else {
+    // prepare and execute R format
+    for (int i = 0; i < core->numLanes; i++) {
+      // set register pointers for readability
+      currentLane = core->lanes[i];
+      regs[0] = &(currentLane->regs[(instruction >> SHIFT_RS) & MASK_REG]);
       regs[1] = &(currentLane->regs[(instruction >> SHIFT_RT) & MASK_REG]);
       regs[2] = &(currentLane->regs[(instruction >> SHIFT_RD) & MASK_REG]);
       core_execute_r(core, currentLane, regs, opcode);
     }
-    
   }
+
+  core->rip++;
 }
 
 void core_execute_r(core_t *core, lane_t *lane, uint32_t * regs[3], int opcode) {
@@ -67,4 +74,5 @@ void core_execute_r(core_t *core, lane_t *lane, uint32_t * regs[3], int opcode) 
 //   //opcode is not a parameter because there is only one I-format instruction now
 //   *regs[0] = imm;
 // }
+
 

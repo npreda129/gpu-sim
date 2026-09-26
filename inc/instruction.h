@@ -17,3 +17,5 @@
 #define OP_CMP 3
 #define OP_CMOV 4
 #define OP_LI 8
+#define OP_HALT 5
+#define OP_JUMP 9

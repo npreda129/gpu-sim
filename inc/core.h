@@ -4,7 +4,7 @@
 #define S_MEM_SIZE 1024 // 1kb
 
 typedef struct core {
-  int pc;
+  int rip;
   // later, add intermediate structures
   int numLanes;
   lane_t ** lanes;

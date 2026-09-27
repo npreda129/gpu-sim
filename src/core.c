@@ -30,7 +30,7 @@ int core_step(core_t *core) { //this will later be renamed block_step
     for (int i = 0; i < core->numLanes; i++) {
       // set register pointers for readability
       currentLane = core->lanes[i];
-      regs[0] = &(currentLane->regs[(instruction >> SHIFT_RS) & MASK_REG]);
+      regs[0] = register_access(currentLane, (instruction >> SHIFT_RS) & MASK_REG);
       // core_execute_i(regs, imm);
       *regs[0] = imm;
     }
@@ -40,9 +40,9 @@ int core_step(core_t *core) { //this will later be renamed block_step
     for (int i = 0; i < core->numLanes; i++) {
       // set register pointers for readability
       currentLane = core->lanes[i];
-      regs[0] = &(currentLane->regs[(instruction >> SHIFT_RS) & MASK_REG]);
-      regs[1] = &(currentLane->regs[(instruction >> SHIFT_RT) & MASK_REG]);
-      regs[2] = &(currentLane->regs[(instruction >> SHIFT_RD) & MASK_REG]);
+      regs[0] = register_access(currentLane, (instruction >> SHIFT_RS) & MASK_REG);
+      regs[1] = register_access(currentLane, (instruction >> SHIFT_RT) & MASK_REG);
+      regs[2] = register_access(currentLane, (instruction >> SHIFT_RD) & MASK_REG);
       core_execute_r(core, currentLane, regs, opcode);
     }
   }
@@ -56,7 +56,7 @@ void core_execute_r(core_t *core, lane_t *lane, uint32_t * regs[3], int opcode) 
   uint32_t *rS = regs[0];
   uint32_t *rT = regs[1];
   uint32_t *rD = regs[2];
-  uint32_t *flags = &(lane->regs[REG_FLAGS]);
+  uint32_t *flags = register_access(lane, REG_FLAGS);
   switch (opcode) {
     case OP_FMA:
       *rD += *rS * *rT;

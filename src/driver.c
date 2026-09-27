@@ -11,9 +11,9 @@ int launch_threads(core_t * core, int n, int binary_size, uint32_t *binary, int 
 
   // zero each lane's registers for the same reason
   for (int i = 0; i < core->numLanes; i++) {
-    memset(core->lanes[i]->regs, 0, 4 * REGS_PER_LANE);
+    memset(core->lanes[i], 0, sizeof(lane_t));
     // set thread id
-    core->lanes[i]->regs[14] = i;
+    *(uint32_t *)register_access((core->lanes[i]), 14) = i;
   }
 
   // run the kernel n times. 

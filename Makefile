@@ -4,7 +4,7 @@ INCFLAGS = -Iinc
 LDFLAGS := -lSDL2
 CFLAGS := -std=c11 -g -O
 
-SRCS := driver.c core.c
+SRCS := driver.c core.c lane.c
 SRCS := $(addprefix src/, $(SRCS))
 OBJS := $(patsubst src/%.c,obj/%.o,$(SRCS))
 

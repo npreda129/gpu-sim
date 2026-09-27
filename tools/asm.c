@@ -37,6 +37,7 @@ int main(int argc, char ** argv) {
     return 1;
   }
 
+  // TODO verify file exists
   read_file = fopen(argv[1], "r");
 
   if (argc == 3) {
@@ -61,11 +62,11 @@ int main(int argc, char ** argv) {
     // JUMP is not supported currently
     // TODO error on trying to write to r0, rT, rF
     if (!strcmp(instrName, "LI")) {
-      if (sscanf(buffer, "%s %s %f", instrName, regNames[0], &immediate) < 2) {
+      if (sscanf(buffer, "%s %s %d", instrName, regNames[0], &immediate) < 2) {
         fprintf(stderr, "Failed to parse register name and immediate\n");
         return 1;
       }
-      printf("Register: %s, Immediate: %f\n", regNames[0], immediate);
+      printf("Register: %s, Immediate: %d\n", regNames[0], immediate);
       
       instrMachine = (OP_LI << SHIFT_OP) + (parse_regName(regNames[0]) << SHIFT_RS) + immediate;
       fwrite(&instrMachine, sizeof(uint32_t), 1, write_file);
@@ -114,5 +115,6 @@ int main(int argc, char ** argv) {
   }
   printf("Reached EOF\n");
 
+  fclose(write_file);
   return 0;
 }

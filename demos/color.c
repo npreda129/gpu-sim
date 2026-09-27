@@ -19,7 +19,7 @@ int main() {
   core_init(&core, WINDOW_WIDTH * WINDOW_HEIGHT);
   init_display(&game, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-  // load kernel from file
+  // load kernel from file TODO verify file exists
   kernel_file = fopen("build/color_kernel", "r");
   size_t binary_size = fread(binary, 4, MAX_B_SIZE, kernel_file);
 

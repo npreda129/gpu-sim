@@ -22,6 +22,6 @@ typedef struct core {
 
 void core_init(core_t *core, int numLanes);
 int core_step(core_t *core);
-void core_execute_r(core_t *core, lane_t *lane, uint32_t * regs[3], int opcode);
+void core_execute_r(core_t *core, lane_t *lane, uint32_t * regs[3], int opcode, int isFloat);
 
 #endif

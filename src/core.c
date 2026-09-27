@@ -43,7 +43,8 @@ int core_step(core_t *core) { //this will later be renamed block_step
       regs[0] = register_access(currentLane, (instruction >> SHIFT_RS) & MASK_REG);
       regs[1] = register_access(currentLane, (instruction >> SHIFT_RT) & MASK_REG);
       regs[2] = register_access(currentLane, (instruction >> SHIFT_RD) & MASK_REG);
-      core_execute_r(core, currentLane, regs, opcode);
+      core_execute_r(core, currentLane, regs, opcode,
+          register_is_float((instruction >> SHIFT_RD) & MASK_REG));
     }
   }
 
@@ -52,14 +53,19 @@ int core_step(core_t *core) { //this will later be renamed block_step
   return 1;
 }
 
-void core_execute_r(core_t *core, lane_t *lane, uint32_t * regs[3], int opcode) {
+void core_execute_r(core_t *core, lane_t *lane, uint32_t * regs[3], int opcode, int isFloat) {
   uint32_t *rS = regs[0];
   uint32_t *rT = regs[1];
   uint32_t *rD = regs[2];
   uint32_t *flags = register_access(lane, REG_FLAGS);
   switch (opcode) {
     case OP_FMA:
-      *rD += *rS * *rT;
+      // a float destination register means the operands are treated as floats
+      if (isFloat) {
+        *(float *)rD += *(float *)rS * *(float *)rT;
+      } else {
+        *rD += *rS * *rT;
+      }
       break;
     case OP_LW:
       memcpy(rD, &(core->sharedMem[*rS]), 4);

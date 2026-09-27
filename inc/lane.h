@@ -23,5 +23,6 @@ typedef struct lane {
 } lane_t;
 
 void * register_access(lane_t *lane, int regNum);
+int register_is_float(int regNum);
 
 #endif

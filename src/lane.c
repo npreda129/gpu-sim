@@ -20,3 +20,7 @@ void * register_access(lane_t *lane, int regNum) {
 
   return NULL;
 }
+
+int register_is_float(int regNum) {
+  return regNum >= REGS_INT_PER_LANE && regNum < REGS_INT_PER_LANE + REGS_FLOAT_PER_LANE;
+}

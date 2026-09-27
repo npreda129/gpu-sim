@@ -4,13 +4,14 @@ void core_init(core_t *core, int numLanes) {
   // *core = malloc(sizeof(core_t));
   core->lanes = malloc(sizeof(lane_t *) * numLanes);
   core->numLanes = numLanes;
+  core->rip = 0;
 
   for (int i = 0; i < numLanes; i++) {
     core->lanes[i] = malloc(sizeof(lane_t));
   }
 }
 
-void core_step(core_t *core) { //this will later be renamed block_step
+int core_step(core_t *core) { //this will later be renamed block_step
   lane_t *currentLane;
   uint32_t * regs[3];
   int opcode, imm;
@@ -18,7 +19,8 @@ void core_step(core_t *core) { //this will later be renamed block_step
 
   opcode = (instruction >> SHIFT_OP) & MASK_OP;
   if (opcode == OP_HALT) {
-    return;
+    // 0 will indicate the kernel is done
+    return 0;
   }
 
   if (opcode & 0x8) {
@@ -45,6 +47,8 @@ void core_step(core_t *core) { //this will later be renamed block_step
   }
 
   core->rip++;
+  // 1 will indicate there are still instructions to be executed
+  return 1;
 }
 
 void core_execute_r(core_t *core, lane_t *lane, uint32_t * regs[3], int opcode) {
@@ -71,6 +75,12 @@ void core_execute_r(core_t *core, lane_t *lane, uint32_t * regs[3], int opcode) 
     case OP_CMOV:
       // if zero flag set, rD := rS. else rD := rT
       *rD = (*flags & FLAG_MASK_ZERO ? *rS : *rT);
+      break;
+    case OP_SHL:
+      *rD = *rS << *rT;
+      break;
+    case OP_SHR:
+      *rD = *rS >> *rT;
       break;
   }
 }

@@ -8,7 +8,7 @@
 
 
 #define MAX_B_SIZE 1024 // 1k instructions, 4kb
-#define S_MEM_SIZE 1024 // 1kb
+#define S_MEM_SIZE 4194304 // 4mb
 
 typedef struct core {
   int rip;

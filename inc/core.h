@@ -10,11 +10,25 @@
 #define MAX_B_SIZE 1024 // 1k instructions, 4kb
 #define S_MEM_SIZE 4194304 // 4mb
 
+// counted per lane, except instructions, which is how many times the shared
+// instruction pointer issued one
+typedef struct core_stats {
+  uint64_t instructions;
+  uint64_t laneOps;
+  uint64_t loads;
+  uint64_t stores;
+  uint64_t flops;
+} core_stats_t;
+
 typedef struct core {
   int rip;
   // later, add intermediate structures
   int numLanes;
   lane_t ** lanes;
+
+  core_stats_t stats;
+  int binarySize; // bytes of binaryMem holding the current kernel
+  int tracing; // print each instruction of this launch (trace level 2+)
   
   uint32_t binaryMem[MAX_B_SIZE];
   uint8_t sharedMem[S_MEM_SIZE];

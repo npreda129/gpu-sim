@@ -19,8 +19,10 @@
 #define OP_SW 2
 #define OP_CMP 3
 #define OP_CMOV 4
-#define OP_LI 8
 #define OP_HALT 5
+#define OP_SHL 6
+#define OP_SHR 7
+#define OP_LI 8
 #define OP_JUMP 9
 
 #endif

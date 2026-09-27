@@ -8,13 +8,13 @@ SRCS := driver.c core.c lane.c
 SRCS := $(addprefix src/, $(SRCS))
 OBJS := $(patsubst src/%.c,obj/%.o,$(SRCS))
 
-all: dirs build/mandelbrot # build/asm
+all: dirs build/mandelbrot build/asm
 
 dirs:
 	mkdir -p obj build
 
-# build/asm: tools/asm.c 
-# 	$(CC) $^ -o $@ $(CFLAGS) $(INCFLAGS)
+build/asm: tools/asm.c 
+	$(CC) $^ -o $@ $(CFLAGS) $(INCFLAGS)
 
 build/mandelbrot: demos/mandelbrot.c $(OBJS) 
 	$(CC) $^ -o $@ $(CFLAGS) $(INCFLAGS) $(LDFLAGS)
@@ -24,4 +24,5 @@ obj/%.o: src/%.c
 
 clean:
 	rm -r obj build
+
 .PHONY: all dirs clean

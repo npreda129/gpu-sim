@@ -61,10 +61,10 @@ void core_execute_r(core_t *core, lane_t *lane, uint32_t * regs[3], int opcode) 
       *rD += *rS * *rT;
       break;
     case OP_LW:
-      *rD = core->sharedMem[*rS];
+      memcpy(rD, &(core->sharedMem[*rS]), 4);
       break;
     case OP_SW:
-      core->sharedMem[*rD] = *rS;
+      memcpy(&(core->sharedMem[*rD]), rS, 4);
       break;
     case OP_CMP:
       // if rS - rT is positive, unset sign flag. otherwise set it

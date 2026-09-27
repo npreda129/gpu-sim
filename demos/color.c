@@ -14,7 +14,7 @@ int main() {
   FILE *kernel_file;
   uint32_t binary[MAX_B_SIZE];
   uint32_t pixel;
-  uint8_t *dataMem;
+  uint8_t *dataMem = NULL;
 
   core_init(&core, WINDOW_WIDTH * WINDOW_HEIGHT);
   init_display(&game, WINDOW_WIDTH, WINDOW_HEIGHT);

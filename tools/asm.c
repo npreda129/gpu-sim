@@ -29,7 +29,7 @@ int main(int argc, char ** argv) {
   char buffer[MAX_LINE];
   char instrName[MAX_LINE];
   char regNames[3][MAX_LINE];
-  float immediate;
+  uint32_t immediate;
   uint32_t instrMachine;
 
   if (argc < 2 || argc > 3) {

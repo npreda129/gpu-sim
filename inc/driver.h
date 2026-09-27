@@ -13,6 +13,8 @@ struct Game {
 
 int launch_threads(core_t * core, int nthreads, int binary_size, uint32_t *binary, int mem_size, uint8_t *mem);
 
-int init_display(struct Game *game, int windowWidth, int windowHeight); 
+void init_display(struct Game *game, int windowWidth, int windowHeight); 
+
+void destroy_display(struct Game *game);
 
 #endif

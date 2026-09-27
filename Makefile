@@ -4,11 +4,11 @@ INCFLAGS = -Iinc
 LDFLAGS := -lSDL2
 CFLAGS := -std=c11 -g -O
 
-SRCS := driver.c core.c lane.c
+SRCS := driver.c core.c
 SRCS := $(addprefix src/, $(SRCS))
 OBJS := $(patsubst src/%.c,obj/%.o,$(SRCS))
 
-all: dirs build/mandelbrot build/asm
+all: dirs build/asm build/color
 
 dirs:
 	mkdir -p obj build
@@ -16,8 +16,11 @@ dirs:
 build/asm: tools/asm.c 
 	$(CC) $^ -o $@ $(CFLAGS) $(INCFLAGS)
 
-build/mandelbrot: demos/mandelbrot.c $(OBJS) 
+build/color: demos/color.c $(OBJS)
 	$(CC) $^ -o $@ $(CFLAGS) $(INCFLAGS) $(LDFLAGS)
+
+# build/%_kernel: demos/%_kernel.s
+# 	build/asm $< $@
 
 obj/%.o: src/%.c 
 	$(CC) -c $< -o $@ $(CFLAGS) $(INCFLAGS)

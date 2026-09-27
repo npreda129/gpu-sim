@@ -3,8 +3,8 @@
 #include "driver.h"
 #include "core.h"
 
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
+#define WINDOW_WIDTH 80
+#define WINDOW_HEIGHT 60
 #define MAX_INPUT 80
 
 int main() {
@@ -28,15 +28,15 @@ int main() {
 
   //at this point, the pixels will be in core memory
   for (int x = 0; x < WINDOW_WIDTH; x++) {
-    for (int y = 0; x < WINDOW_HEIGHT; y++) {
-      pixel = ((uint32_t[WINDOW_WIDTH][WINDOW_HEIGHT]) core.sharedMem)[x][y];
+    for (int y = 0; y < WINDOW_HEIGHT; y++) {
+      memcpy(&pixel, &(core.sharedMem[4 * (y * WINDOW_WIDTH + x)]), 4);
       SDL_SetRenderDrawColor(game.renderer, 
           (pixel >> 24) & 0xFF, (pixel >> 16) & 0xFF, (pixel >> 8) & 0xFF, 0xFF);
       SDL_RenderDrawPoint(game.renderer, x, y);
     }
   }
 
-  SDL_RenderPresent(renderer);
+  SDL_RenderPresent(game.renderer);
   
   for (;;) {
     if (SDL_PollEvent(&(game.event)) && game.event.type == SDL_QUIT)

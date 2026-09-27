@@ -16,7 +16,7 @@ int launch_threads(core_t * core, int n, int binary_size, uint32_t *binary, int 
 
   // run the kernel n times. 
   // reset the core's RIP after each
-  for (i = 0; i < n; i++) {
+  for (int i = 0; i < n; i++) {
     while (core_step(core))
       ; // do nothing
     core->rip = 0;
@@ -35,7 +35,7 @@ void init_display(struct Game *game, int windowWidth, int windowHeight) {
 	}
 }
 
-int destroy_display(struct Game *game) {
+void destroy_display(struct Game *game) {
   // TODO error handling
   SDL_DestroyRenderer(game->renderer);
   SDL_DestroyWindow(game->window);

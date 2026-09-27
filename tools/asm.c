@@ -41,8 +41,9 @@ int main(int argc, char ** argv) {
 
   if (argc == 3) {
     write_file = fopen(argv[2], "w");
+  } else {
+    write_file = fopen("a.out", "w");
   }
-  write_file = fopen("a.out", "w");
 
   while (fgets(buffer, MAX_LINE - 1, read_file)) {
     // discard comments

@@ -1,4 +1,8 @@
+#ifndef CORE_H
+#define CORE_H
+
 #include "lane.h"
+#include <stdint.h>
 
 #define MAX_B_SIZE 1024 // 1k instructions, 4kb
 #define S_MEM_SIZE 1024 // 1kb
@@ -13,6 +17,7 @@ typedef struct core {
   uint8_t sharedMem[S_MEM_SIZE];
 } core_t;
 
-void core_init(core_t *core);
+void core_init(core_t *core, int numLanes);
 void core_step(core_t *core);
 
+#endif

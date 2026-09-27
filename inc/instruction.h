@@ -1,3 +1,6 @@
+#ifndef INSTRUCTION_H
+#define INSTRUCTION_H
+
 // Shifts (applied first)
 #define SHIFT_OP 28
 #define SHIFT_RS 24
@@ -19,3 +22,5 @@
 #define OP_LI 8
 #define OP_HALT 5
 #define OP_JUMP 9
+
+#endif

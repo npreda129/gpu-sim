@@ -1,7 +1,7 @@
 #include "core.h"
 
 void core_init(core_t *core, int numLanes) {
-  *core = malloc(sizeof(core_t));
+  // *core = malloc(sizeof(core_t));
   core->numLanes = numLanes;
 
   for (int i = 0; i < numLanes; i++) {
@@ -19,6 +19,7 @@ void core_step(core_t *core) { //this will later be renamed block_step
   if (opcode == OP_HALT) {
     return;
   }
+
   if (opcode & 0x8) {
     // prepare and execute I format
     imm = (instruction >> SHIFT_IMM) & MASK_IMM;
@@ -29,6 +30,7 @@ void core_step(core_t *core) { //this will later be renamed block_step
       // core_execute_i(regs, imm);
       *regs[0] = imm;
     }
+
   } else {
     // prepare and execute R format
     for (int i = 0; i < core->numLanes; i++) {

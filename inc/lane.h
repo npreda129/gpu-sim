@@ -1,3 +1,8 @@
+#ifndef LANE_H
+#define LANE_H
+
+#include <stdint.h>
+
 #define REGS_PER_LANE 16 
 #define REG_FLAGS 15
 #define REG_THREAD_ID 14
@@ -9,3 +14,5 @@
 typedef struct lane {
   uint32_t regs[REGS_PER_LANE];
 } lane_t;
+
+#endif

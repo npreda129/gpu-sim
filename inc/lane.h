@@ -10,6 +10,7 @@
 // later to parse it
 
 #define FLAG_MASK_ZERO 0x1
+#define FLAG_MASK_SIGN 0x2
 
 typedef struct lane {
   uint32_t regs[REGS_PER_LANE];

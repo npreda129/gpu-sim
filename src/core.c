@@ -2,6 +2,7 @@
 
 void core_init(core_t *core, int numLanes) {
   // *core = malloc(sizeof(core_t));
+  core->lanes = malloc(sizeof(lane_t *) * numLanes);
   core->numLanes = numLanes;
 
   for (int i = 0; i < numLanes; i++) {
@@ -50,7 +51,7 @@ void core_execute_r(core_t *core, lane_t *lane, uint32_t * regs[3], int opcode) 
   uint32_t *rS = regs[0];
   uint32_t *rT = regs[1];
   uint32_t *rD = regs[2];
-  uint32_t flags = &(lane->regs[REG_FLAGS]);
+  uint32_t *flags = &(lane->regs[REG_FLAGS]);
   switch (opcode) {
     case OP_FMA:
       *rD += *rS * *rT;
@@ -62,12 +63,14 @@ void core_execute_r(core_t *core, lane_t *lane, uint32_t * regs[3], int opcode) 
       core->sharedMem[*rD] = *rS;
       break;
     case OP_CMP:
-      // if rS - rT is positive, unset zero flag. otherwise set it
-      *flags = (*rS > *rT ? *flags & !FLAG_MASK_ZERO : *flags | FLAG_MASK_ZERO)
+      // if rS - rT is positive, unset sign flag. otherwise set it
+      *flags = (*rS > *rT ? *flags & !FLAG_MASK_SIGN : *flags | FLAG_MASK_SIGN);
+      // if rS == rT, set the zero flag. otherwise unset it
+      *flags = (*rS == *rT ? &flags | FLAG_MASK_ZERO : *flags & !FLAG_MASK_ZERO);
       break;
     case OP_CMOV:
       // if zero flag set, rD := rS. else rD := rT
-      *rD = (*flags & FLAG_MASK_ZERO ? *rS : *rT)
+      *rD = (*flags & FLAG_MASK_ZERO ? *rS : *rT);
       break;
   }
 }

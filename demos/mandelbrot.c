@@ -16,12 +16,11 @@ int main() {
   init_display(&game, WINDOW_WIDTH, WINDOW_HEIGHT);
   
   for (;;) {
-    if (!fgets(input, MAX_INPUT - 1, stdin)) {
-      fprintf(stderr, "Error reading input: %s\n", SDL_GetError());
-      return 1;
-    }
-    if (!strcmp(input, "quit")) {
-      return 0;
-    }
+    if (SDL_PollEvent(&(game.event)) && game.event.type == SDL_QUIT)
+            break;
   }
+  SDL_DestroyRenderer(game.renderer);
+  SDL_DestroyWindow(game.window);
+  SDL_Quit();
+  return 0;
 }

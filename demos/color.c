@@ -3,8 +3,8 @@
 #include "driver.h"
 #include "core.h"
 
-#define WINDOW_WIDTH 80
-#define WINDOW_HEIGHT 60
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
 #define MAX_INPUT 80
 
 int main() {

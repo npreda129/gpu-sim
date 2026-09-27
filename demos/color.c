@@ -5,6 +5,11 @@
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
+// each simulated pixel is drawn as a PIXEL_SIZE x PIXEL_SIZE square, so the
+// gpu only computes RENDER_WIDTH * RENDER_HEIGHT pixels
+#define PIXEL_SIZE 4
+#define RENDER_WIDTH (WINDOW_WIDTH / PIXEL_SIZE)
+#define RENDER_HEIGHT (WINDOW_HEIGHT / PIXEL_SIZE)
 #define MAX_INPUT 80
 
 int main() {
@@ -16,7 +21,7 @@ int main() {
   uint32_t pixel;
   uint8_t *dataMem = NULL;
 
-  core_init(&core, WINDOW_WIDTH * WINDOW_HEIGHT);
+  core_init(&core, RENDER_WIDTH * RENDER_HEIGHT);
   init_display(&game, WINDOW_WIDTH, WINDOW_HEIGHT);
 
   // load kernel from file TODO verify file exists
@@ -27,12 +32,13 @@ int main() {
   launch_threads(&core, 1, binary_size * 4, binary, 0, dataMem);
 
   //at this point, the pixels will be in core memory
-  for (int x = 0; x < WINDOW_WIDTH; x++) {
-    for (int y = 0; y < WINDOW_HEIGHT; y++) {
-      memcpy(&pixel, &(core.sharedMem[4 * (y * WINDOW_WIDTH + x)]), 4);
+  for (int x = 0; x < RENDER_WIDTH; x++) {
+    for (int y = 0; y < RENDER_HEIGHT; y++) {
+      memcpy(&pixel, &(core.sharedMem[4 * (y * RENDER_WIDTH + x)]), 4);
       SDL_SetRenderDrawColor(game.renderer, 
           (pixel >> 24) & 0xFF, (pixel >> 16) & 0xFF, (pixel >> 8) & 0xFF, 0xFF);
-      SDL_RenderDrawPoint(game.renderer, x, y);
+      SDL_Rect square = {x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE};
+      SDL_RenderFillRect(game.renderer, &square);
     }
   }
 

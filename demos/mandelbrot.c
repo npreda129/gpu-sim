@@ -3,8 +3,13 @@
 #include "driver.h"
 #include "core.h"
 
-#define WINDOW_WIDTH 400
-#define WINDOW_HEIGHT 300
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
+// each simulated pixel is drawn as a PIXEL_SIZE x PIXEL_SIZE square, so the
+// gpu only computes RENDER_WIDTH * RENDER_HEIGHT pixels
+#define PIXEL_SIZE 10
+#define RENDER_WIDTH (WINDOW_WIDTH / PIXEL_SIZE)
+#define RENDER_HEIGHT (WINDOW_HEIGHT / PIXEL_SIZE)
 #define MAX_INPUT 80
 
 // the kernel runs one iteration per launch
@@ -35,9 +40,9 @@ int main() {
   uint8_t dataMem[sizeof(uint32_t) + sizeof(struct mandelbrot_params)];
   // start with the whole set on screen, centered at -0.5
   struct mandelbrot_params params = {
-    .multiplier = 3.0f / WINDOW_WIDTH,
-    .width = WINDOW_WIDTH,
-    .inv_width = 1.0f / WINDOW_WIDTH,
+    .multiplier = 3.0f / RENDER_WIDTH,
+    .width = RENDER_WIDTH,
+    .inv_width = 1.0f / RENDER_WIDTH,
     // each channel must stay <= 255 after ITERATIONS steps
     .color_step = ((80 / ITERATIONS) << 24) | ((160 / ITERATIONS) << 16) | ((255 / ITERATIONS) << 8),
   };
@@ -45,7 +50,7 @@ int main() {
   float center_imag = 0;
   int redraw = 1;
 
-  core_init(&core, WINDOW_WIDTH * WINDOW_HEIGHT);
+  core_init(&core, RENDER_WIDTH * RENDER_HEIGHT);
   init_display(&game, WINDOW_WIDTH, WINDOW_HEIGHT);
 
   // load kernel from file
@@ -77,16 +82,16 @@ int main() {
             params.multiplier *= 1.25f;
             break;
           case SDLK_w:
-            center_imag += PAN_FRACTION * WINDOW_HEIGHT * params.multiplier;
+            center_imag += PAN_FRACTION * RENDER_HEIGHT * params.multiplier;
             break;
           case SDLK_s:
-            center_imag -= PAN_FRACTION * WINDOW_HEIGHT * params.multiplier;
+            center_imag -= PAN_FRACTION * RENDER_HEIGHT * params.multiplier;
             break;
           case SDLK_a:
-            center_real -= PAN_FRACTION * WINDOW_WIDTH * params.multiplier;
+            center_real -= PAN_FRACTION * RENDER_WIDTH * params.multiplier;
             break;
           case SDLK_d:
-            center_real += PAN_FRACTION * WINDOW_WIDTH * params.multiplier;
+            center_real += PAN_FRACTION * RENDER_WIDTH * params.multiplier;
             break;
           default:
             redraw = 0;
@@ -102,8 +107,8 @@ int main() {
     redraw = 0;
 
     // zoom and pan around the center of the screen
-    params.left_bound = center_real - WINDOW_WIDTH / 2.0f * params.multiplier;
-    params.top_bound = center_imag + WINDOW_HEIGHT / 2.0f * params.multiplier;
+    params.left_bound = center_real - RENDER_WIDTH / 2.0f * params.multiplier;
+    params.top_bound = center_imag + RENDER_HEIGHT / 2.0f * params.multiplier;
 
     // define shared values once every frame after making changes based on user input
     memcpy(dataMem, &fbAddr, sizeof(uint32_t));
@@ -115,12 +120,13 @@ int main() {
     launch_threads(&core, ITERATIONS, binary_size * 4, binary, sizeof(dataMem), dataMem);
 
     //at this point, the pixels will be in core memory
-    for (int x = 0; x < WINDOW_WIDTH; x++) {
-      for (int y = 0; y < WINDOW_HEIGHT; y++) {
-        memcpy(&pixel, &(core.sharedMem[fbAddr + 4 * (y * WINDOW_WIDTH + x)]), 4);
+    for (int x = 0; x < RENDER_WIDTH; x++) {
+      for (int y = 0; y < RENDER_HEIGHT; y++) {
+        memcpy(&pixel, &(core.sharedMem[fbAddr + 4 * (y * RENDER_WIDTH + x)]), 4);
         SDL_SetRenderDrawColor(game.renderer,
             (pixel >> 24) & 0xFF, (pixel >> 16) & 0xFF, (pixel >> 8) & 0xFF, 0xFF);
-        SDL_RenderDrawPoint(game.renderer, x, y);
+        SDL_Rect square = {x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE};
+        SDL_RenderFillRect(game.renderer, &square);
       }
     }
 

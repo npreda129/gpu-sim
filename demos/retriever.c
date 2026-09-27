@@ -6,9 +6,14 @@
 #include "retriever.h"
 
 // every lane runs every instruction for every face, so frame time scales
-// with WINDOW_WIDTH * WINDOW_HEIGHT * number of faces
-#define WINDOW_WIDTH 400
-#define WINDOW_HEIGHT 300
+// with RENDER_WIDTH * RENDER_HEIGHT * number of faces
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
+// each simulated pixel is drawn as a PIXEL_SIZE x PIXEL_SIZE square, so the
+// gpu only computes RENDER_WIDTH * RENDER_HEIGHT pixels
+#define PIXEL_SIZE 16
+#define RENDER_WIDTH (WINDOW_WIDTH / PIXEL_SIZE)
+#define RENDER_HEIGHT (WINDOW_HEIGHT / PIXEL_SIZE)
 #define MAX_INPUT 80
 
 #define HALF_FOV 0.6f // horizontal, radians
@@ -131,7 +136,7 @@ void fit_camera(struct model *model, struct camera *camera) {
   radius = sqrtf(radius);
 
   // the vertical field of view is the narrower one
-  float halfFovY = atanf(tanf(HALF_FOV) * WINDOW_HEIGHT / WINDOW_WIDTH);
+  float halfFovY = atanf(tanf(HALF_FOV) * RENDER_HEIGHT / RENDER_WIDTH);
   camera->distance = 1.1f * radius / sinf(halfFovY);
   camera->yaw = 0.6f;
   camera->pitch = -0.4f;
@@ -170,8 +175,8 @@ int main(int argc, char **argv) {
   int vertAddr = R_HEADER_SIZE;
   int faceAddr = vertAddr + 12 * model.numVerts;
   int fbAddr = faceAddr + 16 * model.numFaces;
-  int zbAddr = fbAddr + 4 * WINDOW_WIDTH * WINDOW_HEIGHT;
-  int memSize = zbAddr + 4 * WINDOW_WIDTH * WINDOW_HEIGHT;
+  int zbAddr = fbAddr + 4 * RENDER_WIDTH * RENDER_HEIGHT;
+  int memSize = zbAddr + 4 * RENDER_WIDTH * RENDER_HEIGHT;
   if (memSize > S_MEM_SIZE) {
     fprintf(stderr, "Model is too big: needs %d bytes of shared memory, have %d\n",
         memSize, S_MEM_SIZE);
@@ -188,16 +193,16 @@ int main(int argc, char **argv) {
   write_u(dataMem, R_ZB_ADDR, zbAddr);
   write_u(dataMem, R_FACE_PTR, faceAddr);
   write_u(dataMem, R_VERT_ADDR, vertAddr);
-  write_f(dataMem, R_WIDTH, WINDOW_WIDTH);
-  write_f(dataMem, R_INV_WIDTH, 1.0f / WINDOW_WIDTH);
-  write_f(dataMem, R_HALF_WIDTH, WINDOW_WIDTH / 2.0f);
-  write_f(dataMem, R_HALF_HEIGHT, WINDOW_HEIGHT / 2.0f);
-  write_f(dataMem, R_FOCAL, (WINDOW_WIDTH / 2.0f) / tanf(HALF_FOV));
+  write_f(dataMem, R_WIDTH, RENDER_WIDTH);
+  write_f(dataMem, R_INV_WIDTH, 1.0f / RENDER_WIDTH);
+  write_f(dataMem, R_HALF_WIDTH, RENDER_WIDTH / 2.0f);
+  write_f(dataMem, R_HALF_HEIGHT, RENDER_HEIGHT / 2.0f);
+  write_f(dataMem, R_FOCAL, (RENDER_WIDTH / 2.0f) / tanf(HALF_FOV));
   write_f(dataMem, R_NEAR, NEAR);
 
   // the core holds 4mb of shared memory, too much for the stack
   core = malloc(sizeof(core_t));
-  core_init(core, WINDOW_WIDTH * WINDOW_HEIGHT);
+  core_init(core, RENDER_WIDTH * RENDER_HEIGHT);
   init_display(&game, WINDOW_WIDTH, WINDOW_HEIGHT);
 
   kernel_file = fopen("build/retriever_kernel", "r");
@@ -274,12 +279,13 @@ int main(int argc, char **argv) {
     printf("rendering...\n");
     launch_threads(core, model.numFaces, binary_size * 4, binary, memSize, dataMem);
 
-    for (int x = 0; x < WINDOW_WIDTH; x++) {
-      for (int y = 0; y < WINDOW_HEIGHT; y++) {
-        memcpy(&pixel, &(core->sharedMem[fbAddr + 4 * (y * WINDOW_WIDTH + x)]), 4);
+    for (int x = 0; x < RENDER_WIDTH; x++) {
+      for (int y = 0; y < RENDER_HEIGHT; y++) {
+        memcpy(&pixel, &(core->sharedMem[fbAddr + 4 * (y * RENDER_WIDTH + x)]), 4);
         SDL_SetRenderDrawColor(game.renderer,
             (pixel >> 24) & 0xFF, (pixel >> 16) & 0xFF, (pixel >> 8) & 0xFF, 0xFF);
-        SDL_RenderDrawPoint(game.renderer, x, y);
+        SDL_Rect square = {x * PIXEL_SIZE, y * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE};
+        SDL_RenderFillRect(game.renderer, &square);
       }
     }
     SDL_RenderPresent(game.renderer);
